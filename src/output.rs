@@ -14,6 +14,11 @@ pub trait SetOutput {
     fn set_output(&mut self, pin: usize, state: bool) -> Result<(), Error>;
 }
 
+/// Trait to be implemented by chain to return its length
+pub trait Len {
+    fn len(&self) -> usize;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Chain of SIPO shift registers.
@@ -99,6 +104,15 @@ impl<ClockPin, LatchPin, DataPin, const CHAIN_LENGTH: usize> SetOutput
     }
 }
 
+impl<ClockPin, LatchPin, DataPin, const CHAIN_LENGTH: usize> Len
+    for Chain<ClockPin, LatchPin, DataPin, CHAIN_LENGTH>
+{
+    /// Returns the chain length.
+    fn len(&self) -> usize {
+        CHAIN_LENGTH
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Output pin of a chip in the chain.
@@ -112,11 +126,15 @@ pub struct Pin<'a, Chain> {
 
 impl<'a, Chain> Pin<'a, Chain>
 where
-    Chain: SetOutput,
+    Chain: SetOutput + Len,
 {
     /// Creates a new output pin.
-    pub fn new(chain: &'a RefCell<Chain>, pin: usize) -> Self {
-        Self { chain, pin }
+    pub fn new(chain: &'a RefCell<Chain>, pin: usize) -> Result<Self, Error> {
+        if pin >= chain.borrow().len() * 8 {
+            return Err(Error::PinOutOfRange);
+        }
+
+        Ok(Self { chain, pin })
     }
 }
 

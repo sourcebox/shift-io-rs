@@ -8,4 +8,7 @@ pub mod output;
 
 /// Errors
 #[derive(Debug)]
-pub enum Error {}
+pub enum Error {
+    // Pin number is not within the allowed range
+    PinOutOfRange,
+}

@@ -40,10 +40,10 @@ let output_chain_refcell = RefCell::new(output_chain);
 
 // Make some pin objects. These implement the OutputPin trait and can
 // be passed to anything that accepts this trait.
-// The pin argument must be in range 0 to CHAIN_LENGTH-1.
+// The pin argument must be in the allowed range, otherwise an error is returned.
 // Numbering starts from output Q0 of the chip that is first in the chain
-let output_pin1 = shift_io::output::Pin::new(&output_chain_refcell, 0);
-let output_pin5 = shift_io::output::Pin::new(&output_chain_refcell, 5);
+let output_pin1 = shift_io::output::Pin::new(&output_chain_refcell, 0).unwrap();
+let output_pin5 = shift_io::output::Pin::new(&output_chain_refcell, 5).unwrap();
 
 // Set the output state for the pins.
 // The states are not immediately updated but written into a buffer
