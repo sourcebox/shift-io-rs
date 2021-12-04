@@ -16,7 +16,13 @@ pub trait SetOutput {
 
 /// Trait to be implemented by chain to return its length
 pub trait Len {
+    /// Returns the chain length
     fn len(&self) -> usize;
+
+    /// Checks if chain length is 0
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

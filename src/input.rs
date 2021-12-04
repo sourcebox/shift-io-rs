@@ -16,7 +16,13 @@ pub trait GetInput {
 
 /// Trait to be implemented by chain to return its length
 pub trait Len {
+    /// Returns the chain length
     fn len(&self) -> usize;
+
+    /// Checks if chain length is 0
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -141,10 +147,10 @@ where
     type Error = Error;
 
     fn is_high(&self) -> Result<bool, Self::Error> {
-        Ok(self.chain.borrow().get_input(self.pin).unwrap() == true)
+        Ok(self.chain.borrow().get_input(self.pin).unwrap())
     }
 
     fn is_low(&self) -> Result<bool, Self::Error> {
-        Ok(self.chain.borrow().get_input(self.pin).unwrap() == false)
+        Ok(!self.chain.borrow().get_input(self.pin).unwrap())
     }
 }
