@@ -2,7 +2,7 @@
 
 use embedded_hal::digital::v2::{InputPin, OutputPin};
 
-use crate::{input::GetInput, output::SetOutput, Error};
+use crate::{input::GetInput, output::SetOutput, Error, Length};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -140,5 +140,14 @@ impl<ClockPin, LatchPin, DataInPin, DataOutPin, const CHAIN_LENGTH: usize> SetOu
         }
 
         Ok(())
+    }
+}
+
+impl<ClockPin, LatchPin, DataInPin, DataOutPin, const CHAIN_LENGTH: usize> Length
+    for DualChain<ClockPin, LatchPin, DataInPin, DataOutPin, CHAIN_LENGTH>
+{
+    /// Returns the chain length.
+    fn len(&self) -> usize {
+        CHAIN_LENGTH
     }
 }

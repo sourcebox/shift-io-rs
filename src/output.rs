@@ -4,7 +4,7 @@ use core::cell::RefCell;
 
 use embedded_hal::digital::v2::OutputPin;
 
-use crate::Error;
+use crate::{Error, Length};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -12,17 +12,6 @@ use crate::Error;
 pub trait SetOutput {
     /// Sets the output state for a pin.
     fn set_output(&mut self, pin: usize, state: bool) -> Result<(), Error>;
-}
-
-/// Trait to be implemented by chain to return its length
-pub trait Len {
-    /// Returns the chain length
-    fn len(&self) -> usize;
-
-    /// Checks if chain length is 0
-    fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +99,7 @@ impl<ClockPin, LatchPin, DataPin, const CHAIN_LENGTH: usize> SetOutput
     }
 }
 
-impl<ClockPin, LatchPin, DataPin, const CHAIN_LENGTH: usize> Len
+impl<ClockPin, LatchPin, DataPin, const CHAIN_LENGTH: usize> Length
     for Chain<ClockPin, LatchPin, DataPin, CHAIN_LENGTH>
 {
     /// Returns the chain length.
@@ -132,7 +121,7 @@ pub struct Pin<'a, Chain> {
 
 impl<'a, Chain> Pin<'a, Chain>
 where
-    Chain: SetOutput + Len,
+    Chain: SetOutput + Length,
 {
     /// Creates a new output pin.
     pub fn new(chain: &'a RefCell<Chain>, pin: usize) -> Result<Self, Error> {
