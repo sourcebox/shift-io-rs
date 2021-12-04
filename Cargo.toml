@@ -1,0 +1,13 @@
+[package]
+authors = ["Oliver Rockstedt <info@sourcebox.de>"]
+categories = ["embedded", "hardware-support", "no-std"]
+description = "Digital i/o driver for chains of 8-bit shift registers."
+edition = "2021"
+keywords = ["peripheral"]
+license = "MIT"
+name = "shift-io"
+repository = "https://github.com/sourcebox/shift-io-rs"
+version = "0.1.0"
+
+[dependencies]
+embedded-hal = {version = "0.2", features = ["unproven"]}
