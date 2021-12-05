@@ -30,6 +30,7 @@ let latch_pin = gpioa
     .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
 let data_out_pin = gpioa
     .pa2
+    .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
 
 // Create a new chain
 let output_chain: OutputChain =
@@ -42,8 +43,8 @@ let output_chain_refcell = RefCell::new(output_chain);
 // be passed to anything that accepts this trait.
 // The pin argument must be in the allowed range, otherwise an error is returned.
 // Numbering starts from output Q0 of the chip that is first in the chain
-let output_pin1 = shift_io::output::Pin::new(&output_chain_refcell, 0).unwrap();
-let output_pin5 = shift_io::output::Pin::new(&output_chain_refcell, 5).unwrap();
+let mut output_pin1 = shift_io::output::Pin::new(&output_chain_refcell, 0).unwrap();
+let mut output_pin5 = shift_io::output::Pin::new(&output_chain_refcell, 5).unwrap();
 
 // Set the output state for the pins.
 // The states are not immediately updated but written into a buffer
