@@ -10,6 +10,52 @@ This Rust crate implements a digital i/o shift register driver that supports:
 
 ## Usage Examples
 
+### Single chain of input shift registers
+
+```rust
+// Number of chips in the chain
+const CHAIN_LENGTH: usize = 8;
+
+// Defining a own type for the chain makes it easier to pass it around.
+type InputChain = shift_io::input::Chain<
+    PA0<Output<PushPull>>,
+    PA1<Output<PushPull>>,
+    PA2<Input<Floating>>,
+    CHAIN_LENGTH,
+>;
+
+// Initialize pins, code may vary depending on the HAL used
+let clock_pin = gpioa
+    .pa0
+    .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
+let latch_pin = gpioa
+    .pa1
+    .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
+let data_in_pin = gpioa
+    .pa2
+    .into_floating_input(&mut gpioa.moder, &mut gpioa.pupdr);
+
+// Create a new chain
+let input_chain: InputChain = shift_io::input::Chain::new(clock_pin, latch_pin, data_in_pin);
+
+// Put chain into a RefCell to allow several borrows
+let input_chain_refcell = RefCell::new(input_chain);
+
+// Make some pin objects. These implement the InputPin trait and can
+// be passed to anything that accepts this trait.
+// The pin argument must be in the allowed range, otherwise an error is returned.
+// Numbering starts from input D0 of the chip that is first in the chain
+let input_pin1 = shift_io::input::Pin::new(&input_chain_refcell, 0).unwrap();
+let input_pin5 = shift_io::input::Pin::new(&input_chain_refcell, 5).unwrap();
+
+// Read the states into the buffer.
+input_chain_refcell.borrow_mut().update();
+
+// Get the input state for the pins.
+let pin_state1 = input_pin1.is_high().ok();
+let pin_state5 = input_pin5.is_high().ok();
+```
+
 ### Single chain of output shift registers
 
 ```rust
