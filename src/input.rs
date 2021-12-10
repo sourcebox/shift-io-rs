@@ -12,6 +12,9 @@ use crate::{Error, Length};
 pub trait GetInput {
     /// Returns the input state for a pin.
     fn get_input(&self, pin: usize) -> Result<bool, Error>;
+
+    /// Returns the input state for a pin without pin boundary checks.
+    fn get_input_unchecked(&self, pin: usize) -> bool;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,11 +90,23 @@ impl<ClockPin, LatchPin, DataPin, const CHAIN_LENGTH: usize> GetInput
     /// The state is buffered and not read immediately because the bits
     /// have to be shifted in by calling `update()` first.
     fn get_input(&self, pin: usize) -> Result<bool, Error> {
+        if pin >= CHAIN_LENGTH * 8 {
+            return Err(Error::PinOutOfRange);
+        }
+
+        Ok(self.get_input_unchecked(pin))
+    }
+
+    /// Returns the input state for a pin without pin boundary checks.
+    ///
+    /// The state is buffered and not read immediately because the bits
+    /// have to be shifted in by calling `update()` first.
+    fn get_input_unchecked(&self, pin: usize) -> bool {
         // Calculate index and bit position within buffer array
         let index = pin / 8;
         let bit = pin % 8;
 
-        Ok((self.data_buffer[index] & (1 << bit)) != 0)
+        (self.data_buffer[index] & (1 << bit)) != 0
     }
 }
 
@@ -136,10 +151,10 @@ where
     type Error = Error;
 
     fn is_high(&self) -> Result<bool, Self::Error> {
-        Ok(self.chain.borrow().get_input(self.pin).unwrap())
+        Ok(self.chain.borrow().get_input_unchecked(self.pin))
     }
 
     fn is_low(&self) -> Result<bool, Self::Error> {
-        Ok(!self.chain.borrow().get_input(self.pin).unwrap())
+        Ok(!self.chain.borrow().get_input_unchecked(self.pin))
     }
 }

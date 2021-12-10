@@ -108,16 +108,28 @@ where
 impl<ClockPin, LatchPin, DataInPin, DataOutPin, const CHAIN_LENGTH: usize> GetInput
     for DualChain<ClockPin, LatchPin, DataInPin, DataOutPin, CHAIN_LENGTH>
 {
-    /// Return the input state for a pin.
+    /// Returns the input state for a pin.
     ///
     /// The state is buffered and not read immediately because the bits
     /// have to be shifted in by calling `update()` first.
     fn get_input(&self, pin: usize) -> Result<bool, Error> {
+        if pin >= CHAIN_LENGTH * 8 {
+            return Err(Error::PinOutOfRange);
+        }
+
+        Ok(self.get_input_unchecked(pin))
+    }
+
+    /// Return the input state for a pin without pin boundary checks.
+    ///
+    /// The state is buffered and not read immediately because the bits
+    /// have to be shifted in by calling `update()` first.
+    fn get_input_unchecked(&self, pin: usize) -> bool {
         // Calculate index and bit position within buffer array
         let index = pin / 8;
         let bit = pin % 8;
 
-        Ok((self.data_in_buffer[index] & (1 << bit)) != 0)
+        (self.data_in_buffer[index] & (1 << bit)) != 0
     }
 }
 
@@ -129,6 +141,20 @@ impl<ClockPin, LatchPin, DataInPin, DataOutPin, const CHAIN_LENGTH: usize> SetOu
     /// The output state is buffered and not set immediately because the bits
     /// have to be shifted out by calling `update()` first.
     fn set_output(&mut self, pin: usize, state: bool) -> Result<(), Error> {
+        if pin >= CHAIN_LENGTH * 8 {
+            return Err(Error::PinOutOfRange);
+        }
+
+        self.set_output_unchecked(pin, state);
+
+        Ok(())
+    }
+
+    /// Sets the output state for a pin without pin boundary checks.
+    ///
+    /// The output state is buffered and not set immediately because the bits
+    /// have to be shifted out by calling `update()` first.
+    fn set_output_unchecked(&mut self, pin: usize, state: bool) {
         // Calculate index and bit position within buffer array
         let index = CHAIN_LENGTH - (pin / 8) - 1;
         let bit = pin % 8;
@@ -138,8 +164,6 @@ impl<ClockPin, LatchPin, DataInPin, DataOutPin, const CHAIN_LENGTH: usize> SetOu
         } else {
             self.data_out_buffer[index] &= !(1 << bit);
         }
-
-        Ok(())
     }
 }
 

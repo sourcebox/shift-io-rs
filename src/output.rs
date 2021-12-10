@@ -12,6 +12,9 @@ use crate::{Error, Length};
 pub trait SetOutput {
     /// Sets the output state for a pin.
     fn set_output(&mut self, pin: usize, state: bool) -> Result<(), Error>;
+
+    /// Sets the output state for a pin without pin boundary checks.
+    fn set_output_unchecked(&mut self, pin: usize, state: bool);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,6 +88,20 @@ impl<ClockPin, LatchPin, DataPin, const CHAIN_LENGTH: usize> SetOutput
     /// The output state is buffered and not set immediately because the bits
     /// have to be shifted out by calling `update()` first.
     fn set_output(&mut self, pin: usize, state: bool) -> Result<(), Error> {
+        if pin >= CHAIN_LENGTH * 8 {
+            return Err(Error::PinOutOfRange);
+        }
+
+        self.set_output_unchecked(pin, state);
+
+        Ok(())
+    }
+
+    /// Sets the output state for a pin without pin boundary checks.
+    ///
+    /// The output state is buffered and not set immediately because the bits
+    /// have to be shifted out by calling `update()` first.
+    fn set_output_unchecked(&mut self, pin: usize, state: bool) {
         // Calculate index and bit position within buffer array
         let index = CHAIN_LENGTH - (pin / 8) - 1;
         let bit = pin % 8;
@@ -94,8 +111,6 @@ impl<ClockPin, LatchPin, DataPin, const CHAIN_LENGTH: usize> SetOutput
         } else {
             self.data_buffer[index] &= !(1 << bit);
         }
-
-        Ok(())
     }
 }
 
@@ -140,10 +155,14 @@ where
     type Error = Error;
 
     fn set_low(&mut self) -> Result<(), Self::Error> {
-        self.chain.borrow_mut().set_output(self.pin, false)
+        self.chain
+            .borrow_mut()
+            .set_output_unchecked(self.pin, false);
+        Ok(())
     }
 
     fn set_high(&mut self) -> Result<(), Self::Error> {
-        self.chain.borrow_mut().set_output(self.pin, true)
+        self.chain.borrow_mut().set_output_unchecked(self.pin, true);
+        Ok(())
     }
 }
