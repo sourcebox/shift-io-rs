@@ -76,13 +76,13 @@ where
 
                 // Get input
                 if self.data_in_pin.is_high().ok().unwrap() {
-                    in_value |= 1 << bit;
+                    in_value |= 1 << (7 - bit);
                 } else {
-                    in_value &= !(1 << bit);
+                    in_value &= !(1 << (7 - bit));
                 }
 
                 // Set output
-                let out_state = (out_value & (1 << bit)) != 0;
+                let out_state = (out_value & (1 << (7 - bit))) != 0;
 
                 if out_state {
                     self.data_out_pin.set_high().ok();
@@ -114,8 +114,8 @@ impl<ClockPin, LatchPin, DataInPin, DataOutPin, const CHAIN_LENGTH: usize> GetIn
     /// have to be shifted in by calling `update()` first.
     fn get_input(&self, pin: usize) -> Result<bool, Error> {
         // Calculate index and bit position within buffer array
-        let index = CHAIN_LENGTH - (pin / 8) - 1;
-        let bit = 7 - (pin % 8);
+        let index = pin / 8;
+        let bit = pin % 8;
 
         Ok((self.data_in_buffer[index] & (1 << bit)) != 0)
     }

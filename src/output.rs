@@ -61,7 +61,7 @@ where
             for bit in 0..=7 {
                 self.clock_pin.set_low().ok();
 
-                let state = (data & (1 << bit)) != 0;
+                let state = (data & (1 << (7 - bit))) != 0;
 
                 if state {
                     self.data_pin.set_high().ok();
@@ -87,7 +87,7 @@ impl<ClockPin, LatchPin, DataPin, const CHAIN_LENGTH: usize> SetOutput
     fn set_output(&mut self, pin: usize, state: bool) -> Result<(), Error> {
         // Calculate index and bit position within buffer array
         let index = CHAIN_LENGTH - (pin / 8) - 1;
-        let bit = 7 - (pin % 8);
+        let bit = pin % 8;
 
         if state {
             self.data_buffer[index] |= 1 << bit;
