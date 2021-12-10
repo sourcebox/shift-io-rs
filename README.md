@@ -52,8 +52,8 @@ let input_pin5 = shift_io::input::Pin::new(&input_chain_refcell, 5).unwrap();
 input_chain_refcell.borrow_mut().update();
 
 // Get the input state for the pins.
-let pin_state1 = input_pin1.is_high().ok();
-let pin_state5 = input_pin5.is_high().ok();
+let pin_state1 = input_pin1.is_high().unwrap();
+let pin_state5 = input_pin5.is_high().unwrap();
 ```
 
 ### Single chain of output shift registers
