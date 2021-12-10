@@ -101,6 +101,70 @@ output_pin5.set_low().ok();
 output_chain_refcell.borrow_mut().update();
 ```
 
+### Dual chain of input and output shift register with common clock and latch
+
+```rust
+// Number of chips in the chain
+const CHAIN_LENGTH: usize = 8;
+
+// Defining a own type for the chain makes it easier to pass it around.
+type InOutChain = shift_io::inout::DualChain<
+    PA0<Output<PushPull>>,
+    PA1<Output<PushPull>>,
+    PA2<Input<Floating>>,
+    PA3<Output<PushPull>>,
+    CHAIN_LENGTH,
+>;
+
+// Initialize pins, code may vary depending on the HAL used
+let clock_pin = gpioa
+    .pa0
+    .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
+let latch_pin = gpioa
+    .pa1
+    .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
+let data_in_pin = gpioa
+    .pa2
+    .into_floating_input(&mut gpioa.moder, &mut gpioa.pupdr);
+let data_out_pin = gpioa
+    .pa3
+    .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
+
+// Create a new chain
+let inout_chain: InOutChain =
+    shift_io::inout::DualChain::new(clock_pin, latch_pin, data_in_pin, data_out_pin);
+
+// Put chain into a RefCell to allow several mutable borrows
+let inout_chain_refcell = RefCell::new(inout_chain);
+
+// Make some pin objects. These implement the InputPin trait and can
+// be passed to anything that accepts this trait.
+// The pin argument must be in the allowed range, otherwise an error is returned.
+// Numbering starts from input D0 of the chip that is first in the chain
+let input_pin1 = shift_io::input::Pin::new(&inout_chain_refcell, 0).unwrap();
+let input_pin5 = shift_io::input::Pin::new(&inout_chain_refcell, 5).unwrap();
+
+// Make some pin objects. These implement the OutputPin trait and can
+// be passed to anything that accepts this trait.
+// The pin argument must be in the allowed range, otherwise an error is returned.
+// Numbering starts from output Q0 of the chip that is first in the chain
+let mut output_pin1 = shift_io::output::Pin::new(&inout_chain_refcell, 0).unwrap();
+let mut output_pin5 = shift_io::output::Pin::new(&inout_chain_refcell, 5).unwrap();
+
+// Set the output state for the pins.
+// The states are not immediately updated but written into a buffer
+output_pin1.set_high().ok();
+output_pin5.set_low().ok();
+
+// Shift out the states from the buffer and
+// read the input states into the buffer at the same time
+inout_chain_refcell.borrow_mut().update();
+
+// Get the input state for the pins.
+let _pin_state1 = input_pin1.is_high().unwrap();
+let _pin_state5 = input_pin5.is_high().unwrap();
+```
+
 ## License
 
 Published under the MIT license.
