@@ -131,7 +131,7 @@ impl<ClockPin, LatchPin, DataInPin, DataOutPin, const CHAIN_LENGTH: usize> SetOu
     fn set_output(&mut self, pin: usize, state: bool) -> Result<(), Error> {
         // Calculate index and bit position within buffer array
         let index = CHAIN_LENGTH - (pin / 8) - 1;
-        let bit = 7 - (pin % 8);
+        let bit = pin % 8;
 
         if state {
             self.data_out_buffer[index] |= 1 << bit;
