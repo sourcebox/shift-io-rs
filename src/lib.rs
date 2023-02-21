@@ -1,6 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![no_std]
-#![allow(dead_code)]
+#![warn(missing_docs)]
 
 pub mod inout;
 pub mod input;
@@ -9,7 +9,7 @@ pub mod output;
 /// Errors
 #[derive(Debug)]
 pub enum Error {
-    // Pin number not within the allowed range.
+    /// Pin number not within the allowed range.
     PinOutOfRange,
 }
 
