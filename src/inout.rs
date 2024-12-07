@@ -62,7 +62,7 @@ where
         )
     }
 
-    /// Updates the chain inputs and outputs simultanously by shifting
+    /// Updates the chain inputs and outputs simultaneously by shifting
     /// the data from and to the buffers.
     pub fn update(&mut self) {
         self.latch_pin.set_high().ok();
