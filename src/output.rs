@@ -148,11 +148,11 @@ where
     }
 }
 
-impl<'a, Chain> ErrorType for Pin<'a, Chain> {
+impl<Chain> ErrorType for Pin<'_, Chain> {
     type Error = core::convert::Infallible;
 }
 
-impl<'a, Chain> OutputPin for Pin<'a, Chain>
+impl<Chain> OutputPin for Pin<'_, Chain>
 where
     Chain: SetOutput,
 {
