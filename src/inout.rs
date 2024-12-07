@@ -1,6 +1,6 @@
 //! Dual chain of 8-bit PISO & SIPO shift registers (e.g. 74HC165/74HC595) for digital output
 
-use embedded_hal::digital::v2::{InputPin, OutputPin};
+use embedded_hal::digital::{InputPin, OutputPin};
 
 use crate::{input::GetInput, output::SetOutput, Error, Length};
 

@@ -2,7 +2,7 @@
 
 use core::cell::RefCell;
 
-use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::digital::{ErrorType, OutputPin};
 
 use crate::{Error, Length};
 
@@ -148,12 +148,14 @@ where
     }
 }
 
+impl<'a, Chain> ErrorType for Pin<'a, Chain> {
+    type Error = core::convert::Infallible;
+}
+
 impl<'a, Chain> OutputPin for Pin<'a, Chain>
 where
     Chain: SetOutput,
 {
-    type Error = Error;
-
     fn set_low(&mut self) -> Result<(), Self::Error> {
         self.chain
             .borrow_mut()

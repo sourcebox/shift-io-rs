@@ -10,4 +10,4 @@ repository = "https://github.com/sourcebox/shift-io-rs"
 version = "0.1.0"
 
 [dependencies]
-embedded-hal = {version = "0.2", features = ["unproven"]}
+embedded-hal = "1.0.0"

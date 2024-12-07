@@ -2,7 +2,7 @@
 
 use core::cell::RefCell;
 
-use embedded_hal::digital::v2::{InputPin, OutputPin};
+use embedded_hal::digital::{ErrorType, InputPin, OutputPin};
 
 use crate::{Error, Length};
 
@@ -144,17 +144,19 @@ where
     }
 }
 
+impl<'a, Chain> ErrorType for Pin<'a, Chain> {
+    type Error = core::convert::Infallible;
+}
+
 impl<'a, Chain> InputPin for Pin<'a, Chain>
 where
     Chain: GetInput,
 {
-    type Error = Error;
-
-    fn is_high(&self) -> Result<bool, Self::Error> {
+    fn is_high(&mut self) -> Result<bool, Self::Error> {
         Ok(self.chain.borrow().get_input_unchecked(self.pin))
     }
 
-    fn is_low(&self) -> Result<bool, Self::Error> {
+    fn is_low(&mut self) -> Result<bool, Self::Error> {
         Ok(!self.chain.borrow().get_input_unchecked(self.pin))
     }
 }
